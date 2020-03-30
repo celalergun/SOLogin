@@ -1,2 +1,1 @@
-# SOLogin
-Stackoverflow automatic login utility
+This code is used to login SO site everyday
