@@ -32,11 +32,11 @@ namespace SOLogin
             rnd = new Random();
             while (!stoppingToken.IsCancellationRequested)
             {
-                if (!TryLogin())
+                if (!await TryLoginAsync())
                 {
                     // if we cannot login to the SO site, wait a little and try again
                     // sometimes SO goes to a maintenance mode
-                    Thread.Sleep(1000 + (rnd.Next(500, 1000)));
+                    await Task.Delay(1000 + (rnd.Next(500, 1000)));
                     continue;
                 }
                 for (int i = 0; i < 8 /*hours*/ * 60 /*minutes*/ * 60 /*seconds*/; i++)
@@ -44,9 +44,9 @@ namespace SOLogin
                     // I don't know if there is a counter measure to detect the bots on SO site
                     // but I wanted to make sure the operation is not exactly periodic
                     // (Old habits die hard)
-                    Thread.Sleep(1000 + (rnd.Next(500, 1000)));
+                    await Task.Delay(1000 + (rnd.Next(500, 1000)));
 
-                    // we're not waiting in one "Thread.Sleep" call, 
+                    // we're not waiting in one "Task.Delay" call, 
                     // instead we wait a little bit and then check if we got a cancel request
                     if (stoppingToken.IsCancellationRequested)
                         break;
@@ -62,7 +62,7 @@ namespace SOLogin
             return;
         }
 
-        private bool TryLogin()
+        private async Task<bool> TryLoginAsync()
         {
             BasicBrowser b = new BasicBrowser();
             b.Get("https://stackoverflow.com/users/login");
@@ -73,10 +73,10 @@ namespace SOLogin
             if (response.Contains("Are you a human being"))
             {
                 FeedBack("Unable to login due to captcha request. Waiting...");
-                Thread.Sleep(60000);
+                await Task.Delay(60000);
                 return false;
             }
-                
+
 
             string profil = b.Get("https://stackoverflow.com/users/334690/celal-ergün?tab=profile");
 
